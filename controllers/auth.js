@@ -1,6 +1,7 @@
 import express from "express";
-import User from "../models/user.js";
 import bcrypt from 'bcrypt';
+
+import User from "../models/user.js";
 const router = express.Router();
 
 router.get("/sign-up", (req, res) => {
@@ -37,5 +38,41 @@ router.post("/sign-up", async (req, res) => {
     res.status(400).send(error.message);
   }
 });
+
+router.get("/sign-in", (req, res) => {
+    res.render("auth/sign-in.ejs");
+  });
+  
+router.post("/sign-in", async (req, res) => {
+    try {
+        //check if user is in the database
+        const {username, password} = req.body;
+        const user = await User.findOne({username: username})
+        if (!user){
+            throw new Error('User does not exist');
+        }
+        //compare provided and stored password
+        const validPassword = bcrypt.compareSync(
+            password,
+            user.password
+        )
+        if(!validPassword){
+            throw new Error('Password is incorrect')
+        }
+        //create session
+        req.session.user = {
+            username: user.username
+        }
+        res.status(200).redirect('/')
+    } catch (error) {
+        console.error(error)
+    }
+})
+
+router.get("/sign-out", (req, res) => {
+    req.session.destroy();
+    res.redirect("/")
+})
+
 
 export default router;
