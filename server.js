@@ -7,6 +7,9 @@ import mongoose from "mongoose";
 import methodOverride from "method-override";
 import morgan from "morgan";
 
+//Custom Module
+import authRouter from './controllers/auth.js'
+
 // Set the port from environment variable or default to 3000
 const port = process.env.PORT ? process.env.PORT : "3000";
 
@@ -28,7 +31,9 @@ app.use(morgan('dev'));
 app.get("/", async (req, res) => {
     res.render("index.ejs");
   });
-  
+
+app.use('/auth', authRouter)
+
 
 app.listen(port, () => {
   console.log(`The express app is ready on  http://localhost:${port}`);
